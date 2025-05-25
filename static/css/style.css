@@ -1,0 +1,362 @@
+/* Custom CSS for TikTok Social Listening */
+
+:root {
+    --primary-color: #ff0050;
+    --secondary-color: #25f4ee;
+    --dark-color: #161823;
+    --light-color: #f8f9fa;
+    --success-color: #25d366;
+    --warning-color: #ffa726;
+    --danger-color: #ef5350;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding-top: 76px;
+    background-color: #f8f9fa;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
+/* Main Content */
+.main-content {
+    min-height: calc(100vh - 140px);
+    padding: 2rem 0;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0 !important;
+    font-weight: 600;
+}
+
+/* Stats Cards */
+.stats-card {
+    background: linear-gradient(135deg, #ff0050 0%, #ff4081 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.stats-card.secondary {
+    background: linear-gradient(135deg, #25f4ee 0%, #00bcd4 100%);
+}
+
+.stats-card.success {
+    background: linear-gradient(135deg, #25d366 0%, #4caf50 100%);
+}
+
+.stats-card.warning {
+    background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Tables */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1.2rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b4091 100%);
+    transform: translateY(-1px);
+}
+
+.btn-tiktok {
+    background: linear-gradient(135deg, #ff0050 0%, #ff4081 100%);
+    color: white;
+    border: none;
+}
+
+.btn-tiktok:hover {
+    background: linear-gradient(135deg, #e60048 0%, #e6386f 100%);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Badges */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+    border-radius: 6px;
+}
+
+.badge-trending {
+    background: linear-gradient(135deg, #ff0050 0%, #ff4081 100%);
+}
+
+.badge-viral {
+    background: linear-gradient(135deg, #25f4ee 0%, #00bcd4 100%);
+}
+
+/* Forms */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Hashtag Styling */
+.hashtag {
+    display: inline-block;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #1976d2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin: 0.125rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.hashtag:hover {
+    background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+    color: #1565c0;
+    transform: scale(1.05);
+}
+
+/* Video Preview */
+.video-preview {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 9/16;
+    max-width: 200px;
+}
+
+.video-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    color: white;
+    padding: 1rem;
+}
+
+/* Engagement Metrics */
+.engagement-metrics {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.metric-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.metric-item i {
+    color: #ff0050;
+}
+
+/* Trending Items */
+.trending-item {
+    padding: 1rem;
+    border-radius: 12px;
+    background: white;
+    border-left: 4px solid #ff0050;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.trending-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Content Ideas */
+.idea-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    height: 100%;
+    transition: transform 0.2s ease;
+}
+
+.idea-card:hover {
+    transform: translateY(-4px);
+}
+
+.idea-score {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+/* Loading States */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem 0;
+    }
+
+    .stats-number {
+        font-size: 2rem;
+    }
+
+    .engagement-metrics {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .video-preview {
+        max-width: 150px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #161823;
+        color: #ffffff;
+    }
+
+    .card {
+        background-color: #262938;
+        color: #ffffff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #2a2d3a;
+    }
+
+    .hashtag {
+        background: rgba(102, 126, 234, 0.2);
+        color: #90caf9;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b4091 100%);
+}

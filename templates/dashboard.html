@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - TikTok Social Listening{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-chart-line me-2 text-primary"></i>
+            Dashboard
+        </h1>
+        <p class="text-muted">ภาพรวมข้อมูล Social Listening จาก TikTok</p>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card fade-in">
+            <div class="stats-number">{{ total_posts or 0 }}</div>
+            <div class="stats-label">Total Posts</div>
+            <small class="mt-2 d-block">
+                <i class="fas fa-arrow-up me-1"></i>
+                จากการเก็บข้อมูลทั้งหมด
+            </small>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card secondary fade-in">
+            <div class="stats-number">{{ total_keywords or 0 }}</div>
+            <div class="stats-label">Active Keywords</div>
+            <small class="mt-2 d-block">
+                <i class="fas fa-key me-1"></i>
+                Keywords ที่กำลังติดตาม
+            </small>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card success fade-in">
+            <div class="stats-number">{{ total_engagement or 0 }}</div>
+            <div class="stats-label">Total Engagement</div>
+            <small class="mt-2 d-block">
+                <i class="fas fa-heart me-1"></i>
+                Likes + Comments + Shares
+            </small>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card warning fade-in">
+            <div class="stats-number">{{ trending_posts or 0 }}</div>
+            <div class="stats-label">Trending Posts</div>
+            <small class="mt-2 d-block">
+                <i class="fas fa-fire me-1"></i>
+                Posts ที่มี engagement สูง
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Engagement Over Time Chart -->
+    <div class="col-lg-8 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-area me-2"></i>
+                    Engagement Over Time
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="engagementChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Keywords Chart -->
+    <div class="col-lg-4 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Top Keywords
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="keywordsChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Trending Hashtags -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-hashtag me-2"></i>
+                    Trending Hashtags
+                </h5>
+                <small class="text-light">อัพเดทล่าสุด: {{ last_update or 'ไม่ทราบ' }}</small>
+            </div>
+            <div class="card-body">
+                {% if trending_hashtags %}
+                    <div class="hashtag-cloud">
+                        {% for hashtag, count in trending_hashtags %}
+                            <a href="#" class="hashtag" data-hashtag="{{ hashtag[0] }}" title="{{ hashtag[1] }} posts">
+                                #{{ hashtag[0] }}
+                                <span class="badge badge-trending ms-1">{{ hashtag[1] }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-hashtag fa-3x mb-3 opacity-25"></i>
+                        <p>ยังไม่มีข้อมูล hashtags</p>
+                        <small>เพิ่ม keywords และรอการเก็บข้อมูล</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline">
+                    {% if recent_logs %}
+                        {% for log in recent_logs %}
+                            <div class="activity-item mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="activity-icon me-3">
+                                        {% if log.success %}
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        {% else %}
+                                            <i class="fas fa-exclamation-circle text-danger"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">
+                                            Collected data for "{{ log.keyword }}"
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ log.posts_collected }} posts ·
+                                            {{ log.start_time.strftime('%d/%m/%Y %H:%M') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-history fa-3x mb-3 opacity-25"></i>
+                            <p>ยังไม่มีกิจกรรมล่าสุด</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('main.keywords') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Add Keyword
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-outline-success w-100" onclick="collectData()">
+                            <i class="fas fa-download me-2"></i>
+                            Collect Data Now
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('main.trending') }}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-fire me-2"></i>
+                            View Trending
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('main.content_ideas') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Get Ideas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Chart configurations
+const chartConfig = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'top',
+        }
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            grid: {
+                color: 'rgba(0,0,0,0.1)'
+            }
+        },
+        x: {
+            grid: {
+                color: 'rgba(0,0,0,0.1)'
+            }
+        }
+    }
+};
+
+// Engagement Over Time Chart
+const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+const engagementChart = new Chart(engagementCtx, {
+    type: 'line',
+    data: {
+        labels: {{ engagement_dates | safe if engagement_dates else '[]' }},
+        datasets: [{
+            label: 'Total Engagement',
+            data: {{ engagement_data | safe if engagement_data else '[]' }},
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: chartConfig
+});
+
+// Keywords Chart
+const keywordsCtx = document.getElementById('keywordsChart').getContext('2d');
+const keywordsChart = new Chart(keywordsCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ keyword_labels | safe if keyword_labels else '[]' }},
+        datasets: [{
+            data: {{ keyword_data | safe if keyword_data else '[]' }},
+            backgroundColor: [
+                '#ff0050', '#25f4ee', '#667eea', '#ffa726',
+                '#25d366', '#ef5350', '#ab47bc', '#26a69a'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Functions
+function collectData() {
+    // Show loading modal
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+
+    fetch('/api/collect-now', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+            showAlert('success', `เก็บข้อมูลสำเร็จ! พบ ${data.posts_collected} posts ใหม่`);
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showAlert('danger', 'เกิดข้อผิดพลาด: ' + data.message);
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        showAlert('danger', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+        console.error('Error:', error);
+    });
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Hashtag click handler
+document.querySelectorAll('.hashtag').forEach(hashtag => {
+    hashtag.addEventListener('click', function(e) {
+        e.preventDefault();
+        const tag = this.dataset.hashtag;
+        window.location.href = `/trending?hashtag=${encodeURIComponent(tag)}`;
+    });
+});
+
+// Auto refresh data every 5 minutes
+setInterval(() => {
+    fetch('/api/dashboard-stats')
+    .then(response => response.json())
+    .then(data => {
+        // Update stats without full page reload
+        document.querySelector('.stats-card .stats-number').textContent = data.total_posts || 0;
+        // Update other stats...
+    })
+    .catch(error => console.error('Auto refresh error:', error));
+}, 300000); // 5 minutes
+</script>
+{% endblock %}
