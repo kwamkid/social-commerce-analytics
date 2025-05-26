@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %}Keywords Management - TikTok Social Listening{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-key me-2 text-primary"></i>
+            Keywords Management
+        </h1>
+        <p class="text-muted">จัดการ keywords สำหรับติดตาม content บน TikTok</p>
+    </div>
+</div>
+
+<!-- Add New Keyword Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Add New Keyword
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('main.add_keyword') }}" id="addKeywordForm">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="keyword" class="form-label">Keyword *</label>
+                            <input type="text" name="keyword" id="keyword" class="form-control"
+                                   placeholder="เช่น อาหารไทย, แฟชั่น" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="category" class="form-label">Category</label>
+                            <select name="category" id="category" class="form-select">
+                                <option value="">เลือก Category</option>
+                                <option value="food">Food & Cooking</option>
+                                <option value="travel">Travel & Tourism</option>
+                                <option value="fashion">Fashion & Beauty</option>
+                                <option value="tech">Technology</option>
+                                <option value="lifestyle">Lifestyle</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="education">Education</option>
+                                <option value="business">Business</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select name="priority" id="priority" class="form-select">
+                                <option value="1">Low (1)</option>
+                                <option value="2">Medium (2)</option>
+                                <option value="3" selected>Normal (3)</option>
+                                <option value="4">High (4)</option>
+                                <option value="5">Critical (5)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="description" class="form-label">Description</label>
+                            <input type="text" name="description" id="description" class="form-control"
+                                   placeholder="รายละเอียดเพิ่มเติม">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block w-100">
+                                <i class="fas fa-plus me-1"></i>
+                                Add Keyword
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Keywords List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Active Keywords
+                </h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success btn-sm" onclick="collectAllData()">
+                        <i class="fas fa-download me-1"></i>
+                        Collect All Data
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshKeywords()">
+                        <i class="fas fa-sync me-1"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if keywords.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Keyword</th>
+                                    <th>Category</th>
+                                    <th>Priority</th>
+                                    <th>Posts Found</th>
+                                    <th>Last Collection</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for keyword in keywords.items %}
+                                <tr id="keyword-row-{{ keyword.id }}">
+                                    <td>
+                                        <strong class="text-primary">{{ keyword.keyword }}</strong>
+                                        {% if keyword.description %}
+                                            <br><small class="text-muted">{{ keyword.description }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if keyword.category %}
+                                            <span class="badge bg-info">{{ keyword.category.title() }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set priority_colors = {1: 'secondary', 2: 'info', 3: 'primary', 4: 'warning', 5: 'danger'} %}
+                                        {% set priority_labels = {1: 'Low', 2: 'Medium', 3: 'Normal', 4: 'High', 5: 'Critical'} %}
+                                        <span class="badge bg-{{ priority_colors.get(keyword.priority, 'secondary') }}">
+                                            {{ priority_labels.get(keyword.priority, 'Normal') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold">{{ keyword.total_posts_found or 0 }}</span>
+                                        {% if keyword.total_posts_found > 0 %}
+                                            <small class="text-success">posts</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if keyword.last_collection_time %}
+                                            {{ keyword.last_collection_time.strftime('%d/%m/%Y %H:%M') }}
+                                            <br><small class="text-muted">{{ moment(keyword.last_collection_time).fromNow() }}</small>
+                                        {% else %}
+                                            <span class="text-muted">Never</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if keyword.is_active %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Active
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-pause-circle me-1"></i>Inactive
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ url_for('main.keyword_analytics', keyword=keyword.keyword) }}"
+                                               class="btn btn-outline-primary" title="View Analytics">
+                                                <i class="fas fa-chart-line"></i>
+                                            </a>
+                                            <button class="btn btn-outline-warning"
+                                                    onclick="toggleKeyword({{ keyword.id }})"
+                                                    title="Toggle Active/Inactive">
+                                                {% if keyword.is_active %}
+                                                    <i class="fas fa-pause"></i>
+                                                {% else %}
+                                                    <i class="fas fa-play"></i>
+                                                {% endif %}
+                                            </button>
+                                            <button class="btn btn-outline-danger"
+                                                    onclick="deleteKeyword({{ keyword.id }}, '{{ keyword.keyword }}')"
+                                                    title="Delete Keyword">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if keywords.pages > 1 %}
+                    <nav aria-label="Keywords pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if keywords.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.keywords', page=keywords.prev_num) }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for page_num in keywords.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != keywords.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('main.keywords', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if keywords.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.keywords', page=keywords.next_num) }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <i class="fas fa-key fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">ยังไม่มี Keywords</h4>
+                        <p class="text-muted">เริ่มต้นด้วยการเพิ่ม keyword แรกของคุณ</p>
+                        <button class="btn btn-primary" onclick="document.getElementById('keyword').focus()">
+                            <i class="fas fa-plus me-2"></i>
+                            Add First Keyword
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete keyword "<span id="deleteKeywordName"></span>"?</p>
+                <p class="text-danger"><small>This action cannot be undone. All associated data will be preserved but will no longer be updated.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" style="display: inline;" id="deleteForm">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>
+                        Delete Keyword
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Toggle keyword active/inactive
+function toggleKeyword(keywordId) {
+    fetch(`/api/keywords/${keywordId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('danger', 'Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+        console.error('Error:', error);
+    });
+}
+
+// Delete keyword
+function deleteKeyword(keywordId, keywordName) {
+    document.getElementById('deleteKeywordName').textContent = keywordName;
+    document.getElementById('deleteForm').action = `/keywords/${keywordId}/delete`;
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+}
+
+// Collect data for all active keywords
+function collectAllData() {
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+
+    fetch('/api/collect-now', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+            showAlert('success', 'เริ่มการเก็บข้อมูลแล้ว กรุณารอสักครู่...');
+            // Refresh page after 10 seconds
+            setTimeout(() => location.reload(), 10000);
+        } else {
+            showAlert('danger', 'เกิดข้อผิดพลาด: ' + data.error);
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        showAlert('danger', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+        console.error('Error:', error);
+    });
+}
+
+// Refresh keywords list
+function refreshKeywords() {
+    location.reload();
+}
+
+// Form validation
+document.getElementById('addKeywordForm').addEventListener('submit', function(e) {
+    const keyword = document.getElementById('keyword').value.trim();
+
+    if (keyword.length < 2) {
+        e.preventDefault();
+        showAlert('warning', 'Keyword ต้องมีอย่างน้อย 2 ตัวอักษร');
+        return false;
+    }
+
+    if (keyword.length > 50) {
+        e.preventDefault();
+        showAlert('warning', 'Keyword ต้องไม่เกิน 50 ตัวอักษร');
+        return false;
+    }
+
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Adding...';
+    submitBtn.disabled = true;
+
+    // Reset if form submission fails
+    setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 5000);
+});
+
+// Auto-focus on keyword input when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus on keyword input if no keywords exist
+    const keywordInput = document.getElementById('keyword');
+    const hasKeywords = document.querySelector('tbody tr');
+
+    if (!hasKeywords && keywordInput) {
+        keywordInput.focus();
+    }
+});
+
+// Utility function to show alerts
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Real-time keyword statistics update
+function updateKeywordStats() {
+    fetch('/api/dashboard-stats')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update any stats if needed
+            console.log('Stats updated:', data.data);
+        }
+    })
+    .catch(error => console.error('Error updating stats:', error));
+}
+
+// Update stats every 2 minutes
+setInterval(updateKeywordStats, 120000);
+</script>
+{% endblock %}

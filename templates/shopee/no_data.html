@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ไม่มีข้อมูล - Shopee Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .no-data-container {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-card {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+        }
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 1rem auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Social Commerce Analytics
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>หน้าหลัก
+                </a>
+                <a class="nav-link" href="/shopee">
+                    <i class="fas fa-shopping-cart me-1"></i>Shopee Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="no-data-container">
+            <div class="text-center">
+                <div class="mb-4">
+                    <i class="fas fa-database fa-4x text-muted mb-3"></i>
+                    <h2 class="text-primary">{{ message or "ไม่มีข้อมูล" }}</h2>
+                    <p class="text-muted">{{ suggestion or "กรุณาทำการเก็บข้อมูลก่อน" }}</p>
+                </div>
+
+                <!-- Quick Start Guide -->
+                <div class="row justify-content-center mt-5">
+                    <div class="col-lg-8">
+                        <h4 class="mb-4">🚀 เริ่มต้นใช้งาน Shopee Analytics</h4>
+
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="card action-card h-100">
+                                    <div class="card-body text-center p-4">
+                                        <div class="step-number">1</div>
+                                        <h6 class="card-title">เพิ่ม Keywords</h6>
+                                        <p class="card-text text-muted small">
+                                            เพิ่ม keywords สินค้าที่ต้องการติดตาม
+                                        </p>
+                                        <button class="btn btn-primary btn-sm" onclick="addKeyword()">
+                                            <i class="fas fa-plus me-1"></i>Add Keyword
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card action-card h-100">
+                                    <div class="card-body text-center p-4">
+                                        <div class="step-number">2</div>
+                                        <h6 class="card-title">Scrape ข้อมูล</h6>
+                                        <p class="card-text text-muted small">
+                                            เก็บข้อมูลสินค้าจาก Shopee
+                                        </p>
+                                        <button class="btn btn-success btn-sm" onclick="scrapeData()">
+                                            <i class="fas fa-download me-1"></i>Scrape Now
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card action-card h-100">
+                                    <div class="card-body text-center p-4">
+                                        <div class="step-number">3</div>
+                                        <h6 class="card-title">ดู Analytics</h6>
+                                        <p class="card-text text-muted small">
+                                            วิเคราะห์สินค้าขายดีและ trends
+                                        </p>
+                                        <button class="btn btn-info btn-sm" disabled>
+                                            <i class="fas fa-chart-bar me-1"></i>View Analytics
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Keywords -->
+                <div class="row justify-content-center mt-5">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    Keywords แนะนำ
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    <div class="col-6 col-md-4">
+                                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="addSampleKeyword('iPhone')">
+                                            iPhone
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="addSampleKeyword('เสื้อผ้า')">
+                                            เสื้อผ้า
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="addSampleKeyword('หูฟัง')">
+                                            หูฟัง
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="addSampleKeyword('กระเป๋า')">
+                                            กระเป๋า
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="addSampleKeyword('รองเท้า')">
+                                            รองเท้า
+                                        </button>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="addSampleKeyword('เครื่องสำอาง')">
+                                            เครื่องสำอาง
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Keyword Modal -->
+    <div class="modal fade" id="addKeywordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">เพิ่ม Keyword ใหม่</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="keywordForm">
+                        <div class="mb-3">
+                            <label for="keyword" class="form-label">Keyword <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="keyword" placeholder="เช่น iPhone, เสื้อผ้า" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category">
+                                <option value="">-- เลือก Category --</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="fashion">Fashion</option>
+                                <option value="beauty">Beauty</option>
+                                <option value="home">Home & Living</option>
+                                <option value="sports">Sports</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxPages" class="form-label">จำนวนหน้าที่ต้องการ Scrape</label>
+                            <input type="number" class="form-control" id="maxPages" value="3" min="1" max="10">
+                            <div class="form-text">แนะนำ 3-5 หน้า (60-300 สินค้า)</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-primary" onclick="submitKeyword()">
+                        <i class="fas fa-save me-1"></i>เพิ่ม Keyword
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function addKeyword() {
+            const modal = new bootstrap.Modal(document.getElementById('addKeywordModal'));
+            modal.show();
+        }
+
+        function addSampleKeyword(keyword) {
+            document.getElementById('keyword').value = keyword;
+            addKeyword();
+        }
+
+        function submitKeyword() {
+            const keyword = document.getElementById('keyword').value.trim();
+            const category = document.getElementById('category').value;
+            const maxPages = document.getElementById('maxPages').value;
+
+            if (!keyword) {
+                alert('กรุณาใส่ keyword');
+                return;
+            }
+
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>กำลังเพิ่ม...';
+            btn.disabled = true;
+
+            // Submit form
+            const formData = new FormData();
+            formData.append('keyword', keyword);
+            formData.append('category', category);
+            formData.append('max_pages', maxPages);
+
+            fetch('/shopee/keywords/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(message => {
+                alert(message);
+                if (message.includes('สำเร็จ')) {
+                    window.location.href = '/shopee/keywords';
+                }
+            })
+            .catch(error => {
+                alert('เกิดข้อผิดพลาด: ' + error);
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        function scrapeData() {
+            if (!confirm('ต้องการ Scrape ข้อมูลทั้งหมดหรือไม่?\n(อาจใช้เวลาหลายนาที)')) {
+                return;
+            }
+
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>กำลัง Scrape...';
+            btn.disabled = true;
+
+            fetch('/shopee/scrape-all', {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(message => {
+                alert(message);
+                if (message.includes('สำเร็จ')) {
+                    window.location.href = '/shopee';
+                }
+            })
+            .catch(error => {
+                alert('เกิดข้อผิดพลาด: ' + error);
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

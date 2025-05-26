@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Content Ideas - TikTok Social Listening{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-lightbulb me-2 text-warning"></i>
+            Content Ideas
+        </h1>
+        <p class="text-muted">AI-generated content suggestions based on trending data and analytics</p>
+    </div>
+</div>
+
+<!-- Generate New Ideas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-magic me-2"></i>
+                    Generate New Ideas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <p class="mb-0">
+                            สร้าง content ideas ใหม่จากข้อมูล trending และ engagement patterns ล่าสุด
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-primary" onclick="generateNewIdeas()">
+                            <i class="fas fa-refresh me-2"></i>
+                            Generate Ideas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Ideas Grid -->
+{% if ideas %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h4 class="mb-3">
+            <i class="fas fa-star me-2 text-warning"></i>
+            Recommended Ideas ({{ ideas|length }})
+        </h4>
+    </div>
+
+    {% for idea in ideas %}
+    <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="card idea-card h-100">
+            <div class="card-body position-relative">
+                <!-- Confidence Score Badge -->
+                <div class="idea-score">
+                    {{ "%.0f"|format(idea.confidence_score) }}%
+                </div>
+
+                <!-- Idea Type Badge -->
+                <div class="mb-2">
+                    {% set type_colors = {
+                        'trending_hashtag': 'danger',
+                        'pattern_based': 'primary',
+                        'keyword_based': 'success',
+                        'timing_based': 'info',
+                        'combination_based': 'warning'
+                    } %}
+                    <span class="badge bg-{{ type_colors.get(idea.type, 'secondary') }}">
+                        {% if idea.type == 'trending_hashtag' %}
+                            🔥 Trending
+                        {% elif idea.type == 'pattern_based' %}
+                            📊 Pattern
+                        {% elif idea.type == 'keyword_based' %}
+                            🎯 Keyword
+                        {% elif idea.type == 'timing_based' %}
+                            ⏰ Timing
+                        {% elif idea.type == 'combination_based' %}
+                            🔗 Combo
+                        {% else %}
+                            💡 General
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Idea Content -->
+                <h6 class="card-title text-white mb-3">{{ idea.title }}</h6>
+                <p class="card-text text-white-75 mb-3">{{ idea.description }}</p>
+
+                <!-- Hashtags -->
+                {% if idea.hashtags %}
+                <div class="mb-3">
+                    {% for hashtag in idea.hashtags %}
+                        <span class="badge bg-light text-dark me-1">#{{ hashtag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Predicted Performance -->
+                <div class="mb-3">
+                    <small class="text-white-75">Predicted Engagement:</small>
+                    <div class="progress mt-1" style="height: 6px;">
+                        {% set engagement_percentage = (idea.predicted_engagement / 1000) * 100 if idea.predicted_engagement < 1000 else 100 %}
+                        <div class="progress-bar bg-white" style="width: {{ engagement_percentage }}%"></div>
+                    </div>
+                    <small class="text-white-75">{{ "{:,.0f}".format(idea.predicted_engagement) }} engagements</small>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-grid gap-2">
+                    <button class="btn btn-light btn-sm" onclick="useIdea('{{ idea.title }}', '{{ idea.description }}')">
+                        <i class="fas fa-check me-1"></i>
+                        Use This Idea
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="shareIdea('{{ idea.title }}')">
+                        <i class="fas fa-share me-1"></i>
+                        Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- High Performing Content -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4 class="mb-3">
+            <i class="fas fa-trophy me-2 text-success"></i>
+            High Performing Content
+        </h4>
+    </div>
+
+    {% if high_engagement_posts %}
+        {% for post in high_engagement_posts %}
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <strong class="text-primary">@{{ post.username }}</strong>
+                            {% if post.display_name %}
+                                <small class="text-muted">({{ post.display_name }})</small>
+                            {% endif %}
+                        </div>
+                        <span class="badge bg-success">{{ "{:,.0f}".format(post.engagement_rate) }}%</span>
+                    </div>
+
+                    <p class="card-text">{{ post.description }}</p>
+
+                    <!-- Hashtags -->
+                    <div class="mb-3">
+                        {% for hashtag in post.get_hashtags() %}
+                            <span class="hashtag me-1">#{{ hashtag }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <small class="text-muted d-block">Likes</small>
+                            <strong>{{ "{:,}".format(post.like_count) }}</strong>
+                        </div>
+                        <div class="col-3">
+                            <small class="text-muted d-block">Comments</small>
+                            <strong>{{ "{:,}".format(post.comment_count) }}</strong>
+                        </div>
+                        <div class="col-3">
+                            <small class="text-muted d-block">Shares</small>
+                            <strong>{{ "{:,}".format(post.share_count) }}</strong>
+                        </div>
+                        <div class="col-3">
+                            <small class="text-muted d-block">Views</small>
+                            <strong>{{ "{:,}".format(post.view_count) }}</strong>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="analyzePost({{ post.id }})">
+                            <i class="fas fa-chart-line me-1"></i>
+                            Analyze
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="createSimilar('{{ post.description }}')">
+                            <i class="fas fa-copy me-1"></i>
+                            Create Similar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-4">
+                <i class="fas fa-chart-line fa-2x text-muted mb-3"></i>
+                <p class="text-muted">ยังไม่มีข้อมูล high performing content<br>เพิ่ม keywords และรอการเก็บข้อมูล</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Content Categories Analysis -->
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Content Categories Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if categories %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Posts</th>
+                                    <th>Avg Engagement</th>
+                                    <th>Total Views</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ category.category }}</strong>
+                                    </td>
+                                    <td>{{ category.post_count }}</td>
+                                    <td>{{ "{:,.0f}".format(category.avg_engagement) }}</td>
+                                    <td>{{ "{:,}".format(category.total_views) }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 8px;">
+                                            {% set max_engagement = categories[0].avg_engagement if categories else 1 %}
+                                            {% set percentage = (category.avg_engagement / max_engagement * 100) if max_engagement > 0 else 0 %}
+                                            <div class="progress-bar bg-primary" style="width: {{ percentage }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ "%.1f"|format(category.engagement_per_view) }}% engagement rate</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-pie fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">ยังไม่มีข้อมูลการวิเคราะห์ categories</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Top Hashtags -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-hashtag me-2"></i>
+                    Top Performing Hashtags
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if top_hashtags %}
+                    {% for hashtag, count, avg_engagement, trending_score, total_views, total_likes in top_hashtags[:15] %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="hashtag">#{{ hashtag }}</span>
+                            <br>
+                            <small class="text-muted">{{ count }} posts</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-success fw-semibold">{{ "{:,.0f}".format(avg_engagement) }}</small>
+                            <br>
+                            <small class="text-muted">avg engagement</small>
+                        </div>
+                    </div>
+                    {% if not loop.last %}<hr class="my-2">{% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">ไม่มีข้อมูล hashtags</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Items -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks me-2"></i>
+                    Recommended Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <h6>Optimal Posting Time</h6>
+                            <p class="text-muted">Post between 7-9 PM for better engagement</p>
+                            <button class="btn btn-sm btn-outline-primary">Set Reminder</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-hashtag fa-2x text-success mb-2"></i>
+                            <h6>Trending Hashtags</h6>
+                            <p class="text-muted">Use #อาหารไทย #ท่องเที่ยว for maximum reach</p>
+                            <button class="btn btn-sm btn-outline-success">Copy Hashtags</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                            <h6>Content Format</h6>
+                            <p class="text-muted">Tutorial-style videos perform 40% better</p>
+                            <button class="btn btn-sm btn-outline-warning">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Used Ideas Modal -->
+<div class="modal fade" id="useIdeaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Use Content Idea</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="ideaTitle" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="ideaTitle" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="ideaDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="ideaDescription" rows="3" readonly></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="ideaNotes" class="form-label">Your Notes</label>
+                    <textarea class="form-control" id="ideaNotes" rows="3" placeholder="Add your notes or modifications..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveUsedIdea()">
+                    <i class="fas fa-bookmark me-1"></i>
+                    Save to Used Ideas
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function generateNewIdeas() {
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+
+    fetch('/api/content-ideas/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ limit: 12 })
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+            showAlert('success', `สร้าง ${data.data.length} content ideas ใหม่แล้ว!`);
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showAlert('danger', 'เกิดข้อผิดพลาด: ' + data.error);
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        showAlert('danger', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+        console.error('Error:', error);
+    });
+}
+
+function useIdea(title, description) {
+    document.getElementById('ideaTitle').value = title;
+    document.getElementById('ideaDescription').value = description;
+    document.getElementById('ideaNotes').value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('useIdeaModal'));
+    modal.show();
+}
+
+function saveUsedIdea() {
+    const title = document.getElementById('ideaTitle').value;
+    const description = document.getElementById('ideaDescription').value;
+    const notes = document.getElementById('ideaNotes').value;
+
+    // Here you would normally save to database
+    showAlert('success', `Content idea "${title}" บันทึกแล้ว!`);
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('useIdeaModal'));
+    modal.hide();
+}
+
+function shareIdea(title) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'TikTok Content Idea',
+            text: `Check out this content idea: ${title}`,
+            url: window.location.href
+        });
+    } else {
+        // Fallback - copy to clipboard
+        const text = `TikTok Content Idea: ${title}\n${window.location.href}`;
+        navigator.clipboard.writeText(text).then(() => {
+            showAlert('success', 'Content idea copied to clipboard!');
+        });
+    }
+}
+
+function analyzePost(postId) {
+    window.open(`/post/${postId}`, '_blank');
+}
+
+function createSimilar(description) {
+    // This would typically open a content creation tool
+    showAlert('info', 'Feature coming soon! Create similar content based on: ' + description.substring(0, 50) + '...');
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Copy hashtags functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click event to hashtags for easy copying
+    document.querySelectorAll('.hashtag').forEach(hashtag => {
+        hashtag.addEventListener('click', function() {
+            const text = this.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('success', `Copied ${text} to clipboard!`);
+            });
+        });
+    });
+});
+</script>
+
+<style>
+.idea-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.idea-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.idea-score {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.text-white-75 {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.hashtag {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hashtag:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.progress {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+</style>
+{% endblock %}

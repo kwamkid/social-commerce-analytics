@@ -11,3 +11,6 @@ plotly==5.17.0
 Flask-Migrate==4.0.5
 Werkzeug==2.3.7
 Jinja2==3.1.2
+beautifulsoup4==4.12.2
+lxml==4.9.3
+openpyxl==3.1.2

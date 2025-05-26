@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Commerce Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+        }
+        .feature-card {
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-4">
+                <i class="fas fa-chart-line me-3"></i>
+                Social Commerce Analytics
+            </h1>
+            <p class="lead mb-5">
+                เครื่องมือวิเคราะห์ trends และสินค้าขายดีจาก TikTok และ Shopee
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="/tiktok" class="btn btn-danger btn-lg w-100">
+                                <i class="fab fa-tiktok me-2"></i>
+                                TikTok Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="/shopee" class="btn btn-warning btn-lg w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Shopee Analytics
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">🌟 คุณสมบัติหลัก</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Smart Keyword Tracking</h5>
+                            <p class="card-text text-muted">
+                                ติดตาม keywords และเก็บข้อมูลอัตโนมัติจาก TikTok และ Shopee
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-chart-trending-up fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Real-time Analytics</h5>
+                            <p class="card-text text-muted">
+                                วิเคราะห์ trends, engagement และสถิติต่างๆ แบบ real-time
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-file-export fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Data Export</h5>
+                            <p class="card-text text-muted">
+                                Export ข้อมูลในรูปแบบ CSV, Excel, JSON สำหรับการวิเคราะห์เพิ่มเติม
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3 class="mb-4">🚀 TikTok Analytics</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>วิเคราะห์ trending hashtags</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>ติดตาม viral content</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>สร้าง content ideas</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>เก็บข้อมูลอัตโนมัติ</li>
+                    </ul>
+                    <a href="/tiktok" class="btn btn-danger">
+                        <i class="fab fa-tiktok me-2"></i>เข้าสู่ TikTok Analytics
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <h3 class="mb-4">🛒 Shopee Analytics</h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>ติดตามสินค้าขายดี</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>วิเคราะห์ราคาและยอดขาย</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>หาโอกาสทางธุรกิจ</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Scrape ข้อมูลอัตโนมัติ</li>
+                    </ul>
+                    <a href="/shopee" class="btn btn-warning">
+                        <i class="fas fa-shopping-cart me-2"></i>เข้าสู่ Shopee Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Status Section -->
+    <section class="py-4 bg-primary text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-1">System Status</h6>
+                    <span class="badge bg-success">
+                        <i class="fas fa-check-circle me-1"></i>Online
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small>Version 2.0.0 | Last Updated: <span id="currentTime"></span></small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update current time
+        document.getElementById('currentTime').textContent = new Date().toLocaleString('th-TH');
+    </script>
+</body>
+</html>

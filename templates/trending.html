@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Trending Content - TikTok Social Listening{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-fire me-2 text-danger"></i>
+            Trending Content
+        </h1>
+        <p class="text-muted">Content ที่กำลัง viral และมี engagement สูงบน TikTok</p>
+    </div>
+</div>
+
+<!-- Filter Controls -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>
+                    Filters & Controls
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('main.trending') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="hashtag" class="form-label">Hashtag</label>
+                        <input type="text" name="hashtag" id="hashtag" class="form-control"
+                               placeholder="เช่น อาหารไทย" value="{{ current_hashtag }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="keyword" class="form-label">Keyword</label>
+                        <select name="keyword" id="keyword" class="form-select">
+                            <option value="">All Keywords</option>
+                            {% for kw in available_keywords %}
+                                <option value="{{ kw.keyword }}"
+                                        {% if current_keyword == kw.keyword %}selected{% endif %}>
+                                    {{ kw.keyword }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="days" class="form-label">Time Period</label>
+                        <select name="days" id="days" class="form-select">
+                            <option value="1" {% if current_days == 1 %}selected{% endif %}>Today</option>
+                            <option value="3" {% if current_days == 3 %}selected{% endif %}>3 Days</option>
+                            <option value="7" {% if current_days == 7 %}selected{% endif %}>7 Days</option>
+                            <option value="14" {% if current_days == 14 %}selected{% endif %}>14 Days</option>
+                            <option value="30" {% if current_days == 30 %}selected{% endif %}>30 Days</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sort" class="form-label">Sort By</label>
+                        <select name="sort" id="sort" class="form-select">
+                            <option value="engagement" {% if current_sort == 'engagement' %}selected{% endif %}>Engagement</option>
+                            <option value="likes" {% if current_sort == 'likes' %}selected{% endif %}>Likes</option>
+                            <option value="views" {% if current_sort == 'views' %}selected{% endif %}>Views</option>
+                            <option value="comments" {% if current_sort == 'comments' %}selected{% endif %}>Comments</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        {% if posts.items %}
+            <!-- Results Summary -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-0">
+                        {{ posts.total }} Results Found
+                        {% if current_hashtag %} for #{{ current_hashtag }}{% endif %}
+                        {% if current_keyword %} in "{{ current_keyword }}"{% endif %}
+                    </h5>
+                    <small class="text-muted">
+                        Showing {{ (posts.page - 1) * posts.per_page + 1 }} -
+                        {{ posts.page * posts.per_page if posts.page * posts.per_page < posts.total else posts.total }}
+                        of {{ posts.total }} posts
+                    </small>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown">
+                        <i class="fas fa-download me-1"></i>
+                        Export
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/api/export/csv">
+                            <i class="fas fa-file-csv me-2"></i>CSV
+                        </a></li>
+                        <li><a class="dropdown-item" href="/api/export/excel">
+                            <i class="fas fa-file-excel me-2"></i>Excel
+                        </a></li>
+                        <li><a class="dropdown-item" href="/api/export/json">
+                            <i class="fas fa-file-code me-2"></i>JSON
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Posts Grid -->
+            <div class="row">
+                {% for post in posts.items %}
+                <div class="col-12 mb-4">
+                    <div class="card post-card h-100">
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Post Info -->
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong class="text-primary">@{{ post.username }}</strong>
+                                        {% if post.display_name %}
+                                            <span class="text-muted ms-2">({{ post.display_name }})</span>
+                                        {% endif %}
+                                        <div class="ms-auto">
+                                            {% if post.viral_score >= 50 %}
+                                                <span class="badge bg-danger">VIRAL</span>
+                                            {% elif post.viral_score >= 25 %}
+                                                <span class="badge bg-warning">TRENDING</span>
+                                            {% else %}
+                                                <span class="badge bg-info">POPULAR</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <p class="card-text">{{ post.description }}</p>
+
+                                    <!-- Hashtags -->
+                                    <div class="mb-3">
+                                        {% for hashtag in post.get_hashtags() %}
+                                            <a href="{{ url_for('main.trending', hashtag=hashtag) }}"
+                                               class="hashtag me-1">#{{ hashtag }}</a>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Post Meta -->
+                                    <div class="row text-center">
+                                        <div class="col-3">
+                                            <div class="metric-item">
+                                                <i class="fas fa-heart text-danger"></i>
+                                                <strong>{{ "{:,}".format(post.like_count) }}</strong>
+                                                <small class="d-block text-muted">Likes</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="metric-item">
+                                                <i class="fas fa-comment text-primary"></i>
+                                                <strong>{{ "{:,}".format(post.comment_count) }}</strong>
+                                                <small class="d-block text-muted">Comments</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="metric-item">
+                                                <i class="fas fa-share text-success"></i>
+                                                <strong>{{ "{:,}".format(post.share_count) }}</strong>
+                                                <small class="d-block text-muted">Shares</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="metric-item">
+                                                <i class="fas fa-eye text-info"></i>
+                                                <strong>{{ "{:,}".format(post.view_count) }}</strong>
+                                                <small class="d-block text-muted">Views</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Post Stats -->
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="stats-circle mb-3">
+                                            <div class="circle-progress"
+                                                 data-percentage="{{ "%.1f"|format(post.engagement_rate) }}">
+                                                <div class="circle-content">
+                                                    <span class="percentage">{{ "%.1f"|format(post.engagement_rate) }}%</span>
+                                                    <small>Engagement</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <small class="text-muted">Viral Score</small>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-gradient" role="progressbar"
+                                                     style="width: {{ post.viral_score }}%"></div>
+                                            </div>
+                                            <small class="text-muted">{{ "%.1f"|format(post.viral_score) }}/100</small>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <small class="text-muted">Posted</small>
+                                            <div>{{ post.created_time.strftime('%d/%m/%Y') }}</div>
+                                            <small class="text-muted">{{ moment(post.created_time).fromNow() }}</small>
+                                        </div>
+
+                                        <div class="d-grid gap-1">
+                                            <a href="{{ url_for('main.post_detail', video_id=post.video_id) }}"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>View Details
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                    onclick="copyPostLink('{{ post.video_id }}')">
+                                                <i class="fas fa-link me-1"></i>Copy Link
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if posts.pages > 1 %}
+            <nav aria-label="Posts pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if posts.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.trending',
+                                page=posts.prev_num, hashtag=current_hashtag, keyword=current_keyword,
+                                days=current_days, sort=current_sort) }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for page_num in posts.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != posts.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('main.trending',
+                                        page=page_num, hashtag=current_hashtag, keyword=current_keyword,
+                                        days=current_days, sort=current_sort) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if posts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.trending',
+                                page=posts.next_num, hashtag=current_hashtag, keyword=current_keyword,
+                                days=current_days, sort=current_sort) }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Trending Content Found</h4>
+                <p class="text-muted">
+                    ไม่พบเนื้อหาที่ตรงกับเงื่อนไขที่เลือก<br>
+                    ลองปรับ filters หรือเพิ่ม keywords เพิ่มเติม
+                </p>
+                <div class="mt-3">
+                    <a href="{{ url_for('main.keywords') }}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus me-1"></i>Add Keywords
+                    </a>
+                    <a href="{{ url_for('main.trending') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-refresh me-1"></i>Clear Filters
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Trending Hashtags -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-hashtag me-2"></i>
+                    Trending Hashtags
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if trending_hashtags %}
+                    {% for hashtag, count, avg_engagement, trending_score, total_views, total_likes in trending_hashtags[:10] %}
+                    <div class="trending-item mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{{ url_for('main.trending', hashtag=hashtag) }}"
+                                   class="text-decoration-none">
+                                    <strong>#{{ hashtag }}</strong>
+                                </a>
+                                <br>
+                                <small class="text-muted">
+                                    {{ count }} posts · {{ "{:,}".format(total_likes) }} likes
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge badge-trending">HOT</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">ไม่มีข้อมูล hashtags</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Quick Stats
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border-end">
+                            <h4 class="text-primary mb-0">{{ posts.total or 0 }}</h4>
+                            <small class="text-muted">Total Posts</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="text-success mb-0">
+                            {% if posts.items %}
+                                {{ posts.items|selectattr('viral_score', 'ge', 50)|list|length }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </h4>
+                        <small class="text-muted">Viral Posts</small>
+                    </div>
+                </div>
+
+                {% if posts.items %}
+                    {% set avg_engagement = (posts.items | sum(attribute='like_count') + posts.items | sum(attribute='comment_count') + posts.items | sum(attribute='share_count')) / posts.items|length %}
+                    <hr>
+                    <div class="text-center">
+                        <h5 class="text-warning mb-0">{{ "{:,.0f}".format(avg_engagement) }}</h5>
+                        <small class="text-muted">Avg Engagement</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="refreshData()">
+                        <i class="fas fa-sync me-2"></i>Refresh Data
+                    </button>
+                    <a href="{{ url_for('main.content_ideas') }}" class="btn btn-outline-success">
+                        <i class="fas fa-lightbulb me-2"></i>Get Content Ideas
+                    </a>
+                    <a href="{{ url_for('main.keywords') }}" class="btn btn-outline-info">
+                        <i class="fas fa-key me-2"></i>Manage Keywords
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyPostLink(videoId) {
+    const url = `${window.location.origin}/post/${videoId}`;
+    navigator.clipboard.writeText(url).then(() => {
+        showAlert('success', 'Post link copied to clipboard!');
+    }).catch(() => {
+        showAlert('warning', 'Could not copy link automatically');
+    });
+}
+
+function refreshData() {
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+
+    fetch('/api/collect-now', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+            showAlert('success', 'กำลังอัพเดทข้อมูล... หน้าจะรีเฟรชใน 10 วินาที');
+            setTimeout(() => location.reload(), 10000);
+        } else {
+            showAlert('danger', 'เกิดข้อผิดพลาด: ' + data.error);
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        showAlert('danger', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+        console.error('Error:', error);
+    });
+}
+
+// Initialize circle progress bars
+document.addEventListener('DOMContentLoaded', function() {
+    const circles = document.querySelectorAll('.circle-progress');
+    circles.forEach(circle => {
+        const percentage = parseFloat(circle.dataset.percentage);
+        // Add animation here if needed
+        circle.style.setProperty('--percentage', percentage);
+    });
+});
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+
+<style>
+.post-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.circle-progress {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.circle-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.percentage {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #667eea;
+}
+
+.metric-item {
+    padding: 8px;
+}
+
+.metric-item i {
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+}
+
+.progress-bar.bg-gradient {
+    background: linear-gradient(90deg, #ff0050 0%, #25f4ee 100%);
+}
+</style>
+{% endblock %}

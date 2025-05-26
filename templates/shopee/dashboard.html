@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Analytics Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .stats-card {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-card.secondary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stats-card.success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stats-card.warning { background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%); }
+        .stats-number { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .stats-label { font-size: 0.9rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+        .navbar-custom { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Social Commerce Analytics
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>หน้าหลัก
+                </a>
+                <a class="nav-link" href="/tiktok">
+                    <i class="fab fa-tiktok me-1"></i>TikTok
+                </a>
+                <a class="nav-link active" href="/shopee">
+                    <i class="fas fa-shopping-cart me-1"></i>Shopee
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-shopping-cart me-2 text-primary"></i>
+                    Shopee Analytics Dashboard
+                </h1>
+                <p class="text-muted">ภาพรวมข้อมูลสินค้าขายดีจาก Shopee</p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-5">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number">{{ total_products or 0 }}</div>
+                    <div class="stats-label">Total Products</div>
+                    <small class="mt-2 d-block">
+                        <i class="fas fa-box me-1"></i>
+                        สินค้าทั้งหมดในระบบ
+                    </small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card secondary">
+                    <div class="stats-number">{{ total_keywords or 0 }}</div>
+                    <div class="stats-label">Active Keywords</div>
+                    <small class="mt-2 d-block">
+                        <i class="fas fa-search me-1"></i>
+                        Keywords ที่กำลังติดตาม
+                    </small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card success">
+                    <div class="stats-number">{{ "{:,}".format(total_sales or 0) }}</div>
+                    <div class="stats-label">Total Sales</div>
+                    <small class="mt-2 d-block">
+                        <i class="fas fa-chart-line me-1"></i>
+                        ยอดขายรวมทั้งหมด
+                    </small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card warning">
+                    <div class="stats-number">{{ "{:,.0f}".format(total_revenue or 0) }}฿</div>
+                    <div class="stats-label">Total Revenue</div>
+                    <small class="mt-2 d-block">
+                        <i class="fas fa-money-bill-wave me-1"></i>
+                        มูลค่าการขายโดยประมาณ
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coming Soon Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body text-center p-5">
+                        <i class="fas fa-rocket fa-4x text-primary mb-4"></i>
+                        <h3 class="mb-3">Shopee Analytics กำลังพัฒนา!</h3>
+                        <p class="text-muted mb-4">
+                            เรากำลังพัฒนาฟีเจอร์การวิเคราะห์สินค้าขายดีจาก Shopee 
+                            ซึ่งจะรวมถึงการติดตามราคา ยอดขาย และ trends ต่างๆ
+                        </p>
+                        
+                        <div class="row g-4 mt-4">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <i class="fas fa-search fa-2x text-info mb-2"></i>
+                                    <h6>Keyword Tracking</h6>
+                                    <small class="text-muted">ติดตามสินค้าตาม keywords</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
+                                    <h6>Bestsellers</h6>
+                                    <small class="text-muted">สินค้าขายดีอันดับต้นๆ</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-bar fa-2x text-success mb-2"></i>
+                                    <h6>Price Analytics</h6>
+                                    <small class="text-muted">วิเคราะห์ราคาและ trends</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <i class="fas fa-download fa-2x text-primary mb-2"></i>
+                                    <h6>Auto Scraping</h6>
+                                    <small class="text-muted">เก็บข้อมูลอัตโนมัติ</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>สถานะการพัฒนา:</strong> กำลังสร้าง web scraper และ analytics engine
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>
+                            Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                               <a href="/shopee/keywords" class="btn btn-outline-primary w-100">
+    <i class="fas fa-plus-circle me-2"></i>
+    Manage Keywords
+</a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-success w-100" disabled>
+                                    <i class="fas fa-download me-2"></i>
+                                    Scrape Data
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="/shopee/bestsellers" class="btn btn-outline-warning w-100">
+    <i class="fas fa-trophy me-2"></i>
+    View Bestsellers
+</a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-info w-100" disabled>
+                                    <i class="fas fa-file-excel me-2"></i>
+                                    Export Data
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            ฟีเจอร์เหล่านี้จะเปิดใช้งานเร็วๆ นี้
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 bg-light text-center">
+        <div class="container">
+            <small class="text-muted">
+                Shopee Analytics &copy; 2025 | 
+                <a href="/" class="text-decoration-none">กลับหน้าหลัก</a>
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+function scrapeAllData() {
+    if (!confirm('ต้องการ Scrape ข้อมูลจาก Shopee หรือไม่?\n(อาจใช้เวลาหลายนาที)')) {
+        return;
+    }
+
+    // Show loading
+    const originalText = event.target.innerHTML;
+    event.target.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>กำลัง Scrape...';
+    event.target.disabled = true;
+
+    fetch('/shopee/scrape-all', {
+        method: 'POST'
+    })
+    .then(response => response.text())
+    .then(message => {
+        alert(message);
+        if (message.includes('สำเร็จ')) {
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        alert('เกิดข้อผิดพลาด: ' + error);
+    })
+    .finally(() => {
+        event.target.innerHTML = originalText;
+        event.target.disabled = false;
+    });
+}
+</script>
+</body>
+</html>

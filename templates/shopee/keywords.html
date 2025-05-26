@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Keywords - Social Commerce Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .keyword-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .keyword-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .badge-active { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .badge-inactive { background: #6c757d; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Social Commerce Analytics
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>หน้าหลัก
+                </a>
+                <a class="nav-link" href="/tiktok">
+                    <i class="fab fa-tiktok me-1"></i>TikTok
+                </a>
+                <a class="nav-link" href="/shopee">
+                    <i class="fas fa-shopping-cart me-1"></i>Shopee
+                </a>
+                <a class="nav-link active" href="/shopee/keywords">
+                    <i class="fas fa-search me-1"></i>Keywords
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-search me-2 text-primary"></i>
+                    Shopee Keywords Management
+                </h1>
+                <p class="text-muted">จัดการ keywords สำหรับติดตามสินค้าใน Shopee</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeywordModal">
+                    <i class="fas fa-plus me-2"></i>Add Keyword
+                </button>
+            </div>
+        </div>
+
+        <!-- Keywords Table -->
+        <div class="card keyword-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Keywords List
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if keywords and keywords.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Keyword</th>
+                                    <th>Category</th>
+                                    <th>Max Pages</th>
+                                    <th>Price Range</th>
+                                    <th>Products Found</th>
+                                    <th>Last Scrape</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for keyword in keywords.items %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ keyword.keyword }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if keyword.category %}
+                                            <span class="badge bg-secondary">{{ keyword.category }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ keyword.max_pages or 3 }}</td>
+                                    <td>
+                                        {% if keyword.price_min or keyword.price_max %}
+                                            {{ "{:,.0f}".format(keyword.price_min) if keyword.price_min else "0" }} - 
+                                            {{ "{:,.0f}".format(keyword.price_max) if keyword.price_max else "∞" }} ฿
+                                        {% else %}
+                                            <span class="text-muted">All</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ keyword.total_products_found or 0 }}</span>
+                                    </td>
+                                    <td>
+                                        {% if keyword.last_scrape_time %}
+                                            <small>{{ keyword.last_scrape_time.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        {% else %}
+                                            <span class="text-muted">Never</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if keyword.is_active %}
+                                            <span class="badge badge-active">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-inactive">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" 
+                                                    onclick="scrapeKeyword({{ keyword.id }}, '{{ keyword.keyword }}')"
+                                                    title="Scrape Now">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info" 
+                                                    onclick="viewStats('{{ keyword.keyword }}')" title="Analytics">
+                                                <i class="fas fa-chart-line"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" 
+                                                    onclick="editKeyword({{ keyword.id }})" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" 
+                                                    onclick="deleteKeyword({{ keyword.id }}, '{{ keyword.keyword }}')" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if keywords.pages > 1 %}
+                    <nav aria-label="Keywords pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if keywords.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="/shopee/keywords?page={{ keywords.prev_num }}">Previous</a>
+                            </li>
+                            {% endif %}
+
+                            {% for page_num in keywords.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != keywords.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="/shopee/keywords?page={{ page_num }}">{{ page_num }}</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if keywords.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="/shopee/keywords?page={{ keywords.next_num }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                        <h4>ยังไม่มี Keywords</h4>
+                        <p class="text-muted">เริ่มต้นด้วยการเพิ่ม keyword แรกของคุณ</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeywordModal">
+                            <i class="fas fa-plus me-2"></i>Add First Keyword
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="text-primary">{{ keywords.total if keywords else 0 }}</h5>
+                        <small class="text-muted">Total Keywords</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="text-success">Active</h5>
+                        <small class="text-muted">Tracking Status</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="text-info">Ready</h5>
+                        <small class="text-muted">System Status</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Keyword Modal -->
+    <div class="modal fade" id="addKeywordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>Add New Keyword
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="keywordForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="keyword" class="form-label">Keyword <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="keyword" name="keyword" 
+                                   placeholder="เช่น iPhone, เสื้อผ้า, หูฟัง" required>
+                            <div class="form-text">คำที่ต้องการติดตามใน Shopee</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">-- เลือก Category --</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="fashion">Fashion & Beauty</option>
+                                <option value="home">Home & Living</option>
+                                <option value="health">Health & Wellness</option>
+                                <option value="sports">Sports & Outdoor</option>
+                                <option value="food">Food & Beverages</option>
+                                <option value="books">Books & Media</option>
+                                <option value="automotive">Automotive</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="max_pages" class="form-label">Max Pages to Scrape</label>
+                            <input type="number" class="form-control" id="max_pages" name="max_pages" 
+                                   value="3" min="1" max="10">
+                            <div class="form-text">จำนวนหน้าที่จะ scrape (1-10 หน้า)</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price_min" class="form-label">Min Price (฿)</label>
+                                <input type="number" class="form-control" id="price_min" name="price_min" 
+                                       placeholder="0" min="0" step="0.01">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="price_max" class="form-label">Max Price (฿)</label>
+                                <input type="number" class="form-control" id="price_max" name="price_max" 
+                                       placeholder="ไม่จำกัด" min="0" step="0.01">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>หมายเหตุ:</strong> การ scrape ข้อมูลอาจใช้เวลาหลายนาที ขึ้นอยู่กับจำนวนหน้าและความเร็วเซิร์ฟเวอร์
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Add Keyword
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 bg-light text-center">
+        <div class="container">
+            <small class="text-muted">
+                Shopee Keywords &copy; 2025 | 
+                <a href="/shopee" class="text-decoration-none">กลับ Dashboard</a>
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add keyword form submission
+        document.getElementById('keywordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>กำลังเพิ่ม...';
+            submitBtn.disabled = true;
+            
+            fetch('/shopee/keywords/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(message => {
+                alert(message);
+                if (message.includes('สำเร็จ')) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                alert('เกิดข้อผิดพลาด: ' + error);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+
+        function scrapeKeyword(keywordId, keywordName) {
+            if (!confirm(`ต้องการ scrape ข้อมูลสำหรับ "${keywordName}" หรือไม่?\n(อาจใช้เวลาหลายนาที)`)) {
+                return;
+            }
+
+            // Show loading state
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            fetch(`/shopee/scrape/${keywordId}`, {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(message => {
+                alert(message);
+                if (message.includes('สำเร็จ')) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                alert('เกิดข้อผิดพลาด: ' + error);
+            })
+            .finally(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        }
+
+        function viewStats(keyword) {
+            alert(`Analytics สำหรับ "${keyword}"\n(ฟีเจอร์นี้จะเพิ่มในเวอร์ชันถัดไป)`);
+        }
+
+        function editKeyword(keywordId) {
+            alert('ฟีเจอร์แก้ไข keyword จะเพิ่มในเวอร์ชันถัดไป');
+        }
+
+        function deleteKeyword(keywordId, keywordName) {
+            if (!confirm(`ต้องการลบ keyword "${keywordName}" หรือไม่?`)) {
+                return;
+            }
+            alert('ฟีเจอร์ลบ keyword จะเพิ่มในเวอร์ชันถัดไป');
+        }
+    </script>
+</body>
+</html>

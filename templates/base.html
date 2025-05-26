@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TikTok Social Listening{% endblock %}</title>
+    <title>{% block title %}Social Commerce Analytics{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
@@ -24,8 +24,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-                <i class="fab fa-tiktok me-2"></i>
-                TikTok Social Listening
+                <i class="fas fa-chart-line me-2"></i>
+                Social Commerce Analytics
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -34,31 +34,52 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}"
-                           href="{{ url_for('main.dashboard') }}">
-                            <i class="fas fa-chart-line me-1"></i>Dashboard
+                    <!-- TikTok Section -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="tiktokDropdown" role="button"
+                           data-bs-toggle="dropdown">
+                            <i class="fab fa-tiktok me-1"></i>TikTok
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}"
+                                   href="{{ url_for('main.dashboard') }}">
+                                <i class="fas fa-chart-line me-2"></i>Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'main.keywords' %}active{% endif %}"
+                                   href="{{ url_for('main.keywords') }}">
+                                <i class="fas fa-key me-2"></i>Keywords
+                            </a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'main.trending' %}active{% endif %}"
+                                   href="{{ url_for('main.trending') }}">
+                                <i class="fas fa-fire me-2"></i>Trending
+                            </a></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'main.content_ideas' %}active{% endif %}"
+                                   href="{{ url_for('main.content_ideas') }}">
+                                <i class="fas fa-lightbulb me-2"></i>Content Ideas
+                            </a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'main.keywords' %}active{% endif %}"
-                           href="{{ url_for('main.keywords') }}">
-                            <i class="fas fa-key me-1"></i>Keywords
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'main.trending' %}active{% endif %}"
-                           href="{{ url_for('main.trending') }}">
-                            <i class="fas fa-fire me-1"></i>Trending
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'main.content_ideas' %}active{% endif %}"
-                           href="{{ url_for('main.content_ideas') }}">
-                            <i class="fas fa-lightbulb me-1"></i>Content Ideas
-                        </a>
-                    </li>
-                </ul>
+
+                    <!-- Shopee Section -->
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="shopeeDropdown" role="button" data-bs-toggle="dropdown">
+        <i class="fas fa-shopping-cart me-1"></i>Shopee
+    </a>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="/shopee">
+            <i class="fas fa-chart-line me-2"></i>Dashboard
+        </a></li>
+        <li><a class="dropdown-item" href="/shopee/keywords">
+            <i class="fas fa-search me-2"></i>Keywords
+        </a></li>
+        <li><a class="dropdown-item" href="/shopee/bestsellers">
+            <i class="fas fa-trophy me-2"></i>Bestsellers
+        </a></li>
+        <li><a class="dropdown-item" href="#" onclick="scrapeAllData()">
+            <i class="fas fa-download me-2"></i>Scrape Data
+        </a></li>
+    </ul>
+</li>
 
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
@@ -106,7 +127,7 @@
     <footer class="footer bg-light text-center py-3 mt-5">
         <div class="container">
             <span class="text-muted">
-                TikTok Social Listening &copy; 2025 |
+                Social Commerce Analytics &copy; 2025 |
                 <a href="#" class="text-decoration-none">Documentation</a> |
                 <a href="#" class="text-decoration-none">Support</a>
             </span>

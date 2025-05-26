@@ -2,7 +2,9 @@ import requests
 import json
 import time
 from datetime import datetime, timedelta
-from models.models import db, TikTokPost, CollectionLog
+# เป็น
+from models import db
+from models.models import TikTokPost, CollectionLog
 from config import Config
 
 

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Bestsellers - Social Commerce Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stats-card {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .stats-card.secondary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stats-card.success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stats-card.warning { background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%); }
+        .product-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+        .badge-bestseller {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+        .badge-discount {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+        .price-original {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .price-current {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .rating-stars {
+            color: #ffc107;
+        }
+        .filter-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-chart-line me-2"></i>
+                Social Commerce Analytics
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>หน้าหลัก
+                </a>
+                <a class="nav-link" href="/tiktok">
+                    <i class="fab fa-tiktok me-1"></i>TikTok
+                </a>
+                <a class="nav-link" href="/shopee">
+                    <i class="fas fa-shopping-cart me-1"></i>Shopee
+                </a>
+                <a class="nav-link active" href="/shopee/bestsellers">
+                    <i class="fas fa-trophy me-1"></i>Bestsellers
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-trophy me-2 text-warning"></i>
+                    Shopee Bestsellers
+                </h1>
+                <p class="text-muted">สินค้าขายดีอันดับต้นๆ จาก Shopee</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-outline-primary" onclick="refreshData()">
+                    <i class="fas fa-sync-alt me-2"></i>รีเฟรชข้อมูล
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <h4 class="mb-1">{{ total_bestsellers }}</div>
+                    <small>สินค้าขายดี</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card secondary">
+                    <h4 class="mb-1">{{ "{:,.0f}".format(total_revenue) }}฿</h4>
+                    <small>มูลค่ารวม</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card success">
+                    <h4 class="mb-1">{{ "{:,.0f}".format(avg_price) }}฿</h4>
+                    <small>ราคาเฉลี่ย</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card warning">
+                    <h4 class="mb-1">{{ "{:,.0f}".format(avg_sold) }}</h4>
+                    <small>ยอดขายเฉลี่ย</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card filter-card">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">เรียงตาม</label>
+                                <select class="form-select" id="sortBy">
+                                    <option value="sold_count">ยอดขาย</option>
+                                    <option value="price_low">ราคาต่ำสุด</option>
+                                    <option value="price_high">ราคาสูงสุด</option>
+                                    <option value="rating">คะแนนรีวิว</option>
+                                    <option value="discount">ส่วนลดสูงสุด</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">ช่วงราคา</label>
+                                <select class="form-select" id="priceRange">
+                                    <option value="">ทุกราคา</option>
+                                    <option value="0-1000">ต่ำกว่า 1,000฿</option>
+                                    <option value="1000-5000">1,000 - 5,000฿</option>
+                                    <option value="5000-20000">5,000 - 20,000฿</option>
+                                    <option value="20000+">มากกว่า 20,000฿</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">คะแนนขั้นต่ำ</label>
+                                <select class="form-select" id="minRating">
+                                    <option value="">ทุกคะแนน</option>
+                                    <option value="4.5">4.5 ดาวขึ้นไป</option>
+                                    <option value="4.0">4.0 ดาวขึ้นไป</option>
+                                    <option value="3.5">3.5 ดาวขึ้นไป</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">ยอดขายขั้นต่ำ</label>
+                                <select class="form-select" id="minSold">
+                                    <option value="">ทุกจำนวน</option>
+                                    <option value="100">100+ ขาย</option>
+                                    <option value="500">500+ ขาย</option>
+                                    <option value="1000">1,000+ ขาย</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row" id="productsGrid">
+            {% for product in bestsellers %}
+            <div class="col-lg-4 col-md-6 mb-4 product-item"
+                 data-price="{{ product.price }}"
+                 data-rating="{{ product.rating }}"
+                 data-sold="{{ product.sold_count }}"
+                 data-discount="{{ product.discount_percentage }}">
+                <div class="card product-card h-100">
+                    <div class="position-relative">
+                        <img src="{{ product.image_url }}" class="card-img-top product-image" alt="{{ product.name }}">
+                        <div class="position-absolute top-0 start-0 p-2">
+                            <span class="badge badge-bestseller">
+                                <i class="fas fa-fire me-1"></i>Best Seller
+                            </span>
+                        </div>
+                        {% if product.discount_percentage > 0 %}
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <span class="badge badge-discount">
+                                -{{ "{:.0f}".format(product.discount_percentage) }}%
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title">{{ product.name[:50] }}{% if product.name|length > 50 %}...{% endif %}</h6>
+
+                        <div class="mb-2">
+                            <div class="price-current">{{ "{:,}".format(product.price|int) }}฿</div>
+                            {% if product.original_price and product.original_price > product.price %}
+                            <div class="price-original">{{ "{:,}".format(product.original_price|int) }}฿</div>
+                            {% endif %}
+                        </div>
+
+                        {% if product.rating > 0 %}
+                        <div class="mb-2">
+                            <span class="rating-stars">
+                                {% for i in range(5) %}
+                                    {% if i < product.rating|round %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                            <small class="text-muted ms-1">({{ product.rating_count }} รีวิว)</small>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-2">
+                            <small class="text-success">
+                                <i class="fas fa-shopping-bag me-1"></i>
+                                ขายแล้ว {{ "{:,}".format(product.sold_count) }} ชิ้น
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-store me-1"></i>{{ product.shop_name }}
+                                {% if product.shop_location %}
+                                <br><i class="fas fa-map-marker-alt me-1"></i>{{ product.shop_location }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewProduct('{{ product.product_id }}')">
+                                <i class="fas fa-eye me-1"></i>ดูรายละเอียด
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="text-center py-5" style="display: none;">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4>ไม่พบสินค้าที่ตรงกับเงื่อนไข</h4>
+            <p class="text-muted">ลองปรับเปลี่ยนตัวกรองหรือเคลียร์ตัวกรองทั้งหมด</p>
+            <button class="btn btn-outline-primary" onclick="clearFilters()">
+                <i class="fas fa-eraser me-2"></i>เคลียร์ตัวกรอง
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 bg-light text-center">
+        <div class="container">
+            <small class="text-muted">
+                Shopee Bestsellers &copy; 2025 |
+                <a href="/shopee" class="text-decoration-none">กลับ Dashboard</a>
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter functions
+        function applyFilters() {
+            const sortBy = document.getElementById('sortBy').value;
+            const priceRange = document.getElementById('priceRange').value;
+            const minRating = parseFloat(document.getElementById('minRating').value) || 0;
+            const minSold = parseInt(document.getElementById('minSold').value) || 0;
+
+            const products = Array.from(document.querySelectorAll('.product-item'));
+            let visibleCount = 0;
+
+            products.forEach(product => {
+                const price = parseFloat(product.dataset.price);
+                const rating = parseFloat(product.dataset.rating);
+                const sold = parseInt(product.dataset.sold);
+
+                let showProduct = true;
+
+                // Price range filter
+                if (priceRange) {
+                    if (priceRange === '0-1000' && price >= 1000) showProduct = false;
+                    if (priceRange === '1000-5000' && (price < 1000 || price >= 5000)) showProduct = false;
+                    if (priceRange === '5000-20000' && (price < 5000 || price >= 20000)) showProduct = false;
+                    if (priceRange === '20000+' && price < 20000) showProduct = false;
+                }
+
+                // Rating filter
+                if (rating < minRating) showProduct = false;
+
+                // Sold filter
+                if (sold < minSold) showProduct = false;
+
+                if (showProduct) {
+                    product.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    product.style.display = 'none';
+                }
+            });
+
+            // Sort visible products
+            if (sortBy) {
+                sortProducts(sortBy);
+            }
+
+            // Show/hide no results
+            document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        function sortProducts(criteria) {
+            const container = document.getElementById('productsGrid');
+            const products = Array.from(container.querySelectorAll('.product-item:not([style*="display: none"])'));
+
+            products.sort((a, b) => {
+                switch(criteria) {
+                    case 'price_low':
+                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    case 'price_high':
+                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    case 'rating':
+                        return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+                    case 'discount':
+                        return parseFloat(b.dataset.discount) - parseFloat(a.dataset.discount);
+                    default: // sold_count
+                        return parseInt(b.dataset.sold) - parseInt(a.dataset.sold);
+                }
+            });
+
+            // Re-append sorted products
+            products.forEach(product => container.appendChild(product));
+        }
+
+        function clearFilters() {
+            document.getElementById('sortBy').value = 'sold_count';
+            document.getElementById('priceRange').value = '';
+            document.getElementById('minRating').value = '';
+            document.getElementById('minSold').value = '';
+            applyFilters();
+        }
+
+        function refreshData() {
+            window.location.reload();
+        }
+
+        function viewProduct(productId) {
+            alert(`ดูรายละเอียดสินค้า ID: ${productId}\n(ฟีเจอร์นี้จะเพิ่มในเวอร์ชันถัดไป)`);
+        }
+
+        // Event listeners
+        document.getElementById('sortBy').addEventListener('change', applyFilters);
+        document.getElementById('priceRange').addEventListener('change', applyFilters);
+        document.getElementById('minRating').addEventListener('change', applyFilters);
+        document.getElementById('minSold').addEventListener('change', applyFilters);
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            applyFilters();
+        });
+    </script>
+</body>
+</html>

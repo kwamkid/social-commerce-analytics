@@ -1,8 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
 
-db = SQLAlchemy()
+# Import db จาก __init__.py
+from . import db
 
 
 class TikTokPost(db.Model):
@@ -47,7 +47,10 @@ class TikTokPost(db.Model):
     def get_hashtags(self):
         """Get hashtags as list"""
         if self.hashtags:
-            return json.loads(self.hashtags)
+            try:
+                return json.loads(self.hashtags)
+            except:
+                return []
         return []
 
     def set_hashtags(self, hashtag_list):
@@ -57,7 +60,10 @@ class TikTokPost(db.Model):
     def get_mentions(self):
         """Get mentions as list"""
         if self.mentions:
-            return json.loads(self.mentions)
+            try:
+                return json.loads(self.mentions)
+            except:
+                return []
         return []
 
     def set_mentions(self, mention_list):
@@ -76,7 +82,6 @@ class TikTokPost(db.Model):
     def calculate_viral_score(self):
         """Calculate viral score based on engagement and growth"""
         # Simple viral score calculation
-        # You can make this more sophisticated
         base_score = self.like_count * 1.0 + self.comment_count * 2.0 + self.share_count * 3.0
         if self.view_count > 0:
             self.viral_score = (base_score / self.view_count) * 100
@@ -161,12 +166,18 @@ class ContentIdea(db.Model):
 
     def get_hashtags(self):
         if self.based_on_hashtags:
-            return json.loads(self.based_on_hashtags)
+            try:
+                return json.loads(self.based_on_hashtags)
+            except:
+                return []
         return []
 
     def get_tags(self):
         if self.tags:
-            return json.loads(self.tags)
+            try:
+                return json.loads(self.tags)
+            except:
+                return []
         return []
 
 
